@@ -4,6 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat</title>
+    <script>document.addEventListener("DOMContentLoaded", () => {
+        const ws = new WebSocket("ws://localhost:8080");
+    
+        const messagesDiv = document.querySelector(".messages");
+        const userList = document.querySelector(".user-list ul");
+        const inputField = document.querySelector(".input-container input");
+        const sendButton = document.querySelector(".input-container button");
+        const colorPicker = document.querySelector("#user-color");
+        const fontStylePicker = document.querySelector("#font-style");
+    
+        
+    
+        ws.onopen = () => {
+            ws.send(JSON.stringify({ type: "join", username }));
+        };
+    
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+    
+            if (data.type === "users") {
+                userList.innerHTML = "";
+                data.users.forEach(user => {
+                    const userItem = document.createElement("li");
+                    userItem.textContent = user;
+                    userList.appendChild(userItem);
+                });
+            } else if (data.type === "message") {
+                const messageDiv = document.createElement("div");
+                messageDiv.classList.add("message");
+                messageDiv.innerHTML = `<span style="color: ${data.color}; font-style: ${data.style === 'italic' ? 'italic' : 'normal'}; font-weight: ${data.style === 'bold' ? 'bold' : 'normal'}">${data.username}:</span> ${data.text}`;
+                messagesDiv.appendChild(messageDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        };
+    
+        sendButton.addEventListener("click", () => {
+            const messageText = inputField.value.trim();
+            if (messageText) {
+                ws.send(JSON.stringify({
+                    type: "message",
+                    username,
+                    text: messageText,
+                    color: colorPicker.value,
+                    style: fontStylePicker.value,
+                }));
+                inputField.value = "";
+            }
+        });
+    
+        inputField.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                sendButton.click();
+            }
+        });
+    });
+    </script>
     <style>
         body {
             margin: 0;
@@ -24,11 +80,11 @@
         .chat-box {
             display: flex;
             flex-direction: column;
-            width: 70%;
+            width: 60%;
             max-width: 800px;
             height: 80%;
             background: linear-gradient(-45deg, #6a11cb, #2575fc);
-            padding: 10px;
+            padding: 20px;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
@@ -36,11 +92,12 @@
         .messages {
             flex-grow: 1;
             overflow-y: auto;
-            background: #edf8fb;
+            background: #ffffff;
             padding: 10px;
             border-radius: 10px;
             box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.2);
             margin-bottom: 10px;
+            max-height: 400px;
         }
 
         .message {
@@ -68,7 +125,7 @@
 
         .input-container button {
             padding: 10px;
-            background-color: #3d6c73;
+            background-color: #4f46e5;
             border: none;
             border-radius: 0 5px 5px 0;
             color: white;
@@ -78,7 +135,42 @@
         }
 
         .input-container button:hover {
-            background-color: #a03f29;
+            background-color: #4338ca;
+        }
+
+        .emoji-picker {
+            position: relative;
+        }
+
+        .emoji-picker button {
+            padding: 10px;
+            background-color: #4f46e5;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .emoji-picker .emoji-list {
+            position: absolute;
+            top: -150px;
+            right: 0;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            display: none;
+            flex-wrap: wrap;
+            gap: 5px;
+            max-width: 200px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .emoji-picker .emoji-list span {
+            font-size: 20px;
+            cursor: pointer;
         }
 
         .user-list {
@@ -93,6 +185,8 @@
             margin-left: 10px;
             display: flex;
             flex-direction: column;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         .user-list h3 {
@@ -141,6 +235,8 @@
             const messagesDiv = document.querySelector(".messages");
             const inputField = document.querySelector(".input-container input");
             const sendButton = document.querySelector(".input-container button");
+            const emojiPickerButton = document.querySelector(".emoji-picker button");
+            const emojiList = document.querySelector(".emoji-picker .emoji-list");
             const userList = document.querySelector(".user-list ul");
             const colorPicker = document.querySelector("#user-color");
             const fontStylePicker = document.querySelector("#font-style");
@@ -170,9 +266,24 @@
                 }
             }
 
+            sendButton.addEventListener("click", addMessage);
             inputField.addEventListener("keypress", (e) => {
                 if (e.key === "Enter") {
                     addMessage();
+                }
+            });
+
+            // Mostrar/Ocultar lista de emojis
+            emojiPickerButton.addEventListener("click", () => {
+                emojiList.style.display = emojiList.style.display === "flex" ? "none" : "flex";
+            });
+
+            // Insertar emoji al campo de entrada
+            emojiList.addEventListener("click", (e) => {
+                if (e.target.tagName === "SPAN") {
+                    inputField.value += e.target.textContent;
+                    inputField.focus();
+                    emojiList.style.display = "none"; // Cerrar la lista de emojis
                 }
             });
         });
@@ -186,7 +297,13 @@
             </div>
             <div class="input-container">
                 <input type="text" placeholder="Escribe un mensaje...">
-                                
+                <button>Enviar</button>
+                <div class="emoji-picker">
+                    <button>😀</button>
+                    <div class="emoji-list">
+                        <span>😀</span><span>😂</span><span>😅</span><span>😍</span><span>😎</span><span>😢</span><span>😡</span><span>👍</span><span>👏</span>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="user-list">
