@@ -14,7 +14,7 @@
         const colorPicker = document.querySelector("#user-color");
         const fontStylePicker = document.querySelector("#font-style");
     
-        
+        const username = prompt("Ingresa tu nombre de usuario:") || "Anónimo";
     
         ws.onopen = () => {
             ws.send(JSON.stringify({ type: "join", username }));
