@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #f3f4f6, #e0e7ff);
+            background-size: cover;
+            color: #333;
+        }
+
+        .chat-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            width: 70%;
+            max-width: 800px;
+            height: 80%;
+            background: linear-gradient(-45deg, #6a11cb, #2575fc);
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            background: #edf8fb;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+        }
+
+        .message span {
+            font-weight: bold;
+            color: #4f46e5;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .input-container input {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px 0 0 5px;
+            outline: none;
+        }
+
+        .input-container button {
+            padding: 10px;
+            background-color: #3d6c73;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .input-container button:hover {
+            background-color: #a03f29;
+        }
+
+        .user-list {
+            flex-shrink: 0;
+            width: 25%;
+            max-width: 200px;
+            background: linear-gradient(-45deg, #2575fc, #6a11cb);
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-left: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-list h3 {
+            margin: 0 0 10px 0;
+            text-align: center;
+        }
+
+        .user-list ul {
+            list-style: none;
+            padding: 0;
+            flex-grow: 1;
+        }
+
+        .user-list li {
+            margin-bottom: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .user-settings {
+            margin-top: 10px;
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-settings label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .user-settings select,
+        .user-settings input {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const messagesDiv = document.querySelector(".messages");
+            const inputField = document.querySelector(".input-container input");
+            const sendButton = document.querySelector(".input-container button");
+            const userList = document.querySelector(".user-list ul");
+            const colorPicker = document.querySelector("#user-color");
+            const fontStylePicker = document.querySelector("#font-style");
+
+            // Obtener el nombre de usuario
+            const username = new URLSearchParams(window.location.search).get("username") || "Anónimo";
+
+            // Añadir usuario a la lista de usuarios
+            const userItem = document.createElement("li");
+            userItem.textContent = username;
+            userList.appendChild(userItem);
+
+            // Mostrar el nombre del usuario en el campo de entrada
+            inputField.placeholder = `Mensaje de ${username}`;
+
+            function addMessage() {
+                const messageText = inputField.value.trim();
+                const color = colorPicker.value;
+                const fontStyle = fontStylePicker.value;
+                if (messageText) {
+                    const messageDiv = document.createElement("div");
+                    messageDiv.classList.add("message");
+                    messageDiv.innerHTML = `<span style="color: ${color}; font-style: ${fontStyle === 'italic' ? 'italic' : 'normal'}; font-weight: ${fontStyle === 'bold' ? 'bold' : 'normal'}">${username}:</span> ${messageText}`;
+                    messagesDiv.appendChild(messageDiv);
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                    inputField.value = "";
+                }
+            }
+
+            inputField.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    addMessage();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box">
+            <div class="messages">
+                <!-- Mensajes aparecerán aquí -->
+            </div>
+            <div class="input-container">
+                <input type="text" placeholder="Escribe un mensaje...">
+                                
+            </div>
+        </div>
+        <div class="user-list">
+            <h3>Usuarios</h3>
+            <ul>
+                <!-- Lista de usuarios -->
+            </ul>
+            <div class="user-settings">
+                <label for="user-color">Color de usuario:</label>
+                <input type="color" id="user-color" value="#000000">
+
+                <label for="font-style">Estilo de letra:</label>
+                <select id="font-style">
+                    <option value="normal">Normal</option>
+                    <option value="italic">Cursiva</option>
+                    <option value="bold">Negrita</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
