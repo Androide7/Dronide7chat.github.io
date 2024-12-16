@@ -4,62 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat</title>
-    <script>document.addEventListener("DOMContentLoaded", () => {
-        const ws = new WebSocket("ws://localhost:8080");
-    
-        const messagesDiv = document.querySelector(".messages");
-        const userList = document.querySelector(".user-list ul");
-        const inputField = document.querySelector(".input-container input");
-        const sendButton = document.querySelector(".input-container button");
-        const colorPicker = document.querySelector("#user-color");
-        const fontStylePicker = document.querySelector("#font-style");
-    
-        const username = prompt("Ingresa tu nombre de usuario:") || "Anónimo";
-    
-        ws.onopen = () => {
-            ws.send(JSON.stringify({ type: "join", username }));
-        };
-    
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-    
-            if (data.type === "users") {
-                userList.innerHTML = "";
-                data.users.forEach(user => {
-                    const userItem = document.createElement("li");
-                    userItem.textContent = user;
-                    userList.appendChild(userItem);
-                });
-            } else if (data.type === "message") {
-                const messageDiv = document.createElement("div");
-                messageDiv.classList.add("message");
-                messageDiv.innerHTML = `<span style="color: ${data.color}; font-style: ${data.style === 'italic' ? 'italic' : 'normal'}; font-weight: ${data.style === 'bold' ? 'bold' : 'normal'}">${data.username}:</span> ${data.text}`;
-                messagesDiv.appendChild(messageDiv);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            }
-        };
-    
-        sendButton.addEventListener("click", () => {
-            const messageText = inputField.value.trim();
-            if (messageText) {
-                ws.send(JSON.stringify({
-                    type: "message",
-                    username,
-                    text: messageText,
-                    color: colorPicker.value,
-                    style: fontStylePicker.value,
-                }));
-                inputField.value = "";
-            }
-        });
-    
-        inputField.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                sendButton.click();
-            }
-        });
-    });
-    </script>
     <style>
         body {
             margin: 0;
@@ -73,14 +17,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 90vh;
             padding: 20px;
         }
 
         .chat-box {
             display: flex;
             flex-direction: column;
-            width: 60%;
+            width: 50%;
             max-width: 800px;
             height: 80%;
             background: linear-gradient(-45deg, #6a11cb, #2575fc);
@@ -299,9 +243,9 @@
                 <input type="text" placeholder="Escribe un mensaje...">
                 <button>Enviar</button>
                 <div class="emoji-picker">
-                    <button>😀</button>
+                    <button>☺</button>
                     <div class="emoji-list">
-                        <span>😀</span><span>😂</span><span>😅</span><span>😍</span><span>😎</span><span>😢</span><span>😡</span><span>👍</span><span>👏</span>
+                        <span>😂</span><span>😅</span><span>😍</span><span>😎</span><span>😢</span><span>😡</span><span>👍</span><span>👏</span>
                     </div>
                 </div>
             </div>
